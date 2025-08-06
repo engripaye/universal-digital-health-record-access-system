@@ -5,12 +5,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
@@ -26,10 +35,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF for simplicity (enable later for production APIs)
+                // Disable CSRF for simplicity in dev (enable for prod)
                 .csrf(csrf -> csrf.disable())
 
-                // Authorize requests based on roles
+                // Authorize requests
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/public/**").permitAll()
                         .requestMatchers("/patient/**").hasRole("PATIENT")
@@ -38,15 +47,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // OAuth2 Login with Google/National Health ID
-                .oauth2Login(oauth -> oauth
-                        .loginPage("/oauth2/authorization/google") // you can change this
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserService())
-                        )
+                // Enable OAuth2 Login
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/oauth2/authorization/google") // default login page
+                        .defaultSuccessUrl("/dashboard", true)
                 )
 
-                // Logout settings
+                // Enable logout
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                         .permitAll()
@@ -55,22 +62,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Maps roles in a clean way
+    /**
+     * Ensures that ROLE_ is always prefixed and case is consistent.
+     */
     @Bean
-    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
-        DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
-
-        return request -> {
-            OAuth2User oAuth2User = delegate.loadUser(request);
-
-            // Here you would fetch the user from MongoDB and map their roles
-            // For demo purposes, we assume Google users are patients
-            var authorityMapper = new SimpleAuthorityMapper();
-            authorityMapper.setConvertToUpperCase(true);
-            authorityMapper.setDefaultAuthority("ROLE_PATIENT");
-
-            return new CustomOauth2User(oAuth2User, authorityMapper);
-        };
+    public GrantedAuthoritiesMapper grantedAuthoritiesMapper() {
+        SimpleAuthorityMapper authorityMapper = new SimpleAuthorityMapper();
+        authorityMapper.setConvertToUpperCase(true);
+        authorityMapper.setDefaultAuthority("ROLE_PATIENT");
+        return authorityMapper;
     }
-
 }
