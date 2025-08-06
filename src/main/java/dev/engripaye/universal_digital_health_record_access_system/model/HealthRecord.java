@@ -16,14 +16,7 @@ public class HealthRecord {
     private String createdAt;
     private Set<String> sharedWithUserIds;
 
-    public HealthRecord(String id, String patientId, String title, String content, String createdAt, Set<String> sharedWithUserIds) {
-        this.id = id;
-        this.patientId = patientId;
-        this.title = title;
-        this.content = content;
-        this.createdAt = createdAt;
-        this.sharedWithUserIds = sharedWithUserIds;
-    }
+
 
     public String getId() {
         return id;
