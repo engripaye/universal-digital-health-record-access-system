@@ -14,6 +14,9 @@ public class User {
     private String name;
     private Set<Role> roles;
 
+    // No-args constructor (needed for MongoDB + User::new)
+    public User() {
+    }
 
     public User(String id, String oauthId, String email, String name, Set<Role> roles) {
         this.id = id;
