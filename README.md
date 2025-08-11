@@ -201,4 +201,4 @@ This project is licensed under the **MIT License** – you’re free to use, mod
 
 ---
 
-If you want, I can also **add a diagram and visual screenshots** to this README so it looks like a real GitHub production-ready page. That will make it **stand out to recruiters or collaborators**. Would you like me to prepare that next?
+
