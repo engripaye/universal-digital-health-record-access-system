@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: universal-digital-health-record-access-system
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/healthchain
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: #id not available
+            client-secret: #secret not available
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+server:
+  port: 8081

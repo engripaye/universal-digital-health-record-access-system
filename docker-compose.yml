@@ -1,13 +1,26 @@
 version: "3.8"
+
 services:
   mongo:
-    image: mongo:7
+    image: mongo:6.0
+    container_name: healthchain-mongo
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: healthchain
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
       - mongo-data:/data/db
+
+  app:
+    image: healthchain-app
+    container_name: healthchain-app
+    depends_on:
+      - mongo
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/healthchain
 
 volumes:
   mongo-data:
